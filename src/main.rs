@@ -13,9 +13,11 @@ fn main() {
 
 fn compute(input: Vec<i32>) -> Option<i32>{
    for (i, number) in input.iter().enumerate(){
-       for number2 in input.iter().skip(i+1){
-           if number + number2 == 2020{
-               return Some(number * number2)
+       for (j, number2) in input.iter().skip(i+1).enumerate(){
+           for number3 in input.iter().skip(j+1){
+               if number + number2 + number3 == 2020{
+                   return Some(number * number2 * number3)
+               }
            }
        }
    }
@@ -25,7 +27,7 @@ fn compute(input: Vec<i32>) -> Option<i32>{
 #[test]
 fn test_input(){
     assert_eq!(
-        Some(514579),
+        Some(241861950),
         compute(vec![
              1721,
              979,
