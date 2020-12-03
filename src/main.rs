@@ -1,38 +1,46 @@
 use std::io;
 use std::io::{BufRead, BufReader};
 
+
 fn main() {
    let stream = BufReader::new(io::stdin());
-   let lines: Vec<i32> = stream.lines().map(|l|{
-        l.unwrap().parse::<i32>().unwrap()
-   }).collect();
-
-   let result = compute(lines);
-   println!("result: {}", result.expect("no solution found"));
+   let result = compute(stream.lines().map(|l| l.unwrap()));
+   println!("result: {:?}", result);
 }
 
-fn compute(input: Vec<i32>) -> Option<i32>{
-   for (i, number) in input.iter().enumerate(){
-       for number2 in input.iter().skip(i+1){
-           if number + number2 == 2020{
-               return Some(number * number2)
-           }
-       }
-   }
-   return None
+fn compute<I>(lines: I) -> usize
+where I: Iterator<Item=String>{
+    let(sum, index) = lines
+        .step_by(1)
+        .fold((0, 0), |(sum, index), line|{
+            let ch = line.chars()
+                .cycle()
+                .skip(index)
+                .next()
+                .unwrap();
+            let sum = if ch == '#'{ sum +1 } else {sum};
+            (sum, index + 3)
+            }
+        );
+    sum
 }
 
 #[test]
 fn test_input(){
     assert_eq!(
-        Some(514579),
+        7,
         compute(vec![
-             1721,
-             979,
-             366,
-             299,
-             675,
-             1456
-        ])
+            "..##.......".into(),
+            "#...#...#..".into(),
+            ".#....#..#.".into(),
+            "..#.#...#.#".into(),
+            ".#...##..#.".into(),
+            "..#.##.....".into(),
+            ".#.#.#....#".into(),
+            ".#........#".into(),
+            "#.##...#...".into(),
+            "#...##....#".into(),
+            ".#..#...#.#".into()
+        ].into_iter())
     )
 }
