@@ -1,38 +1,54 @@
 use std::io;
 use std::io::{BufRead, BufReader};
 
-fn main() {
-   let stream = BufReader::new(io::stdin());
-   let lines: Vec<i32> = stream.lines().map(|l|{
-        l.unwrap().parse::<i32>().unwrap()
-   }).collect();
-
-   let result = compute(lines);
-   println!("result: {}", result.expect("no solution found"));
+#[derive(Debug)]
+struct Policy{
+    lower_bound: usize,
+    upper_bound: usize,
+    character: char,
 }
 
-fn compute(input: Vec<i32>) -> Option<i32>{
-   for (i, number) in input.iter().enumerate(){
-       for number2 in input.iter().skip(i+1){
-           if number + number2 == 2020{
-               return Some(number * number2)
-           }
-       }
-   }
-   return None
+fn main() {
+   let stream = BufReader::new(io::stdin());
+   let result = compute(
+       stream.lines()
+       .map(|l| l.unwrap())
+   );
+   println!("result: {:?}", result);
+}
+
+fn parse_line(line: String) -> (Policy, String){
+    let split: Vec<&str> = line.split(|c| c == '-' || c== ' ' || c== ':').collect();
+    (Policy{
+        lower_bound: split[0].parse::<usize>().unwrap(),
+        upper_bound: split[1].parse::<usize>().unwrap(),
+        character: split[2].parse::<char>().unwrap()
+
+    }, split[4].into())
+}
+
+fn complies(line: &(Policy, String)) -> bool{
+   let (Policy{lower_bound, upper_bound, character}, password) = line;
+   let count = password.chars()
+       .filter(|ch| &ch == &character)
+       .count();
+   (lower_bound..&(upper_bound+1)).contains(&&count)
+}
+
+fn compute< I>(stream: I) -> usize
+    where I: Iterator<Item=String>{
+    stream.map(|l| parse_line(l))
+        .filter(|i| complies(i))
+        .count()
 }
 
 #[test]
 fn test_input(){
-    assert_eq!(
-        Some(514579),
+    assert_eq!(2,
         compute(vec![
-             1721,
-             979,
-             366,
-             299,
-             675,
-             1456
-        ])
+            "1-3 a: abcde".into(),
+            "1-3 b: cdefg".into(),
+            "2-9 c: ccccccccc".into(),
+        ].into_iter())
     )
 }
