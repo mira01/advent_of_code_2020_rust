@@ -30,10 +30,22 @@ fn main() {
 }
 
 fn compute<T: BufRead>(input: &mut T) -> usize{
-   input.lines().map(|passport| {
+   let mut sorted: Vec<usize> = input.lines().map(|passport| {
        let line = passport.unwrap();
        seat_id(&line)
-    }).max().unwrap()
+    }).collect();
+   sorted.sort();
+   let mut iter = sorted.iter();
+   let mut prev = iter.next();
+   for i in iter{
+       if let Some(v) = prev{
+          if i-1 != *v{
+              break;
+          }
+       }
+      prev = Some(i);
+   }
+   *(prev.unwrap() +1)
 }
 
 fn seat_id(position: &str) -> usize {
